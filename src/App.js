@@ -1,26 +1,42 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, {useEffect, useState} from 'react';
+import {connect} from 'react-redux'
+import {getPhotosThunk} from "./redux/app-reducer";
+import {Field, reduxForm} from "redux-form";
+import {Gallery} from "./components/Gallery/Gallery";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+let SearchPhotosForm = ({handleSubmit}) => {
+    return <form onSubmit={handleSubmit}>
+        <Field component="input" name="newSearchText" placeholder="Search photos..." className="input"/>
+        <button>Search</button>
+    </form>
 }
 
-export default App;
+SearchPhotosForm = reduxForm({
+    form: 'searchPhotos'
+})(SearchPhotosForm)
+
+const App = ({photos, getPhotosThunk}) => {
+    useEffect(() => {
+        getPhotosThunk('wallpaper')
+    }, [])
+
+    const onSubmit = ({newSearchText}) => {
+        getPhotosThunk(newSearchText)
+    }
+
+    return (
+        <div className="container">
+            <h1 className="title">Wallpapper photos</h1>
+            <SearchPhotosForm onSubmit={onSubmit}/>
+            <div className="gallery">
+                {photos && <Gallery photos={photos}/>}
+            </div>
+        </div>
+    );
+}
+
+const mapStateToProps = state => ({
+    photos: state.app.photos
+})
+
+export default connect(mapStateToProps, {getPhotosThunk})(App)
